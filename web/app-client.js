@@ -19,8 +19,7 @@ export async function post(url, data) {
     }
 
     return await response.json();
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
     if (e instanceof UnauthorizedError) {
       throw e;
     }
