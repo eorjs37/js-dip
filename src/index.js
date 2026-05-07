@@ -40,7 +40,6 @@ class AuthService {
 
   login(email, password) {
     const user = this.userRepository.findByEmail(email);
-
     if (!user) {
       throw new Error("회원이 존재하지 않습니다.");
     }
