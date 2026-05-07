@@ -1,4 +1,5 @@
-import { NetworkError, UnauthorizedError } from "./errors/error.js";
+import { mapHttpError, mapUnknownError } from "./errors/error-mapper.js";
+import { AppError, NetworkError, UnauthorizedError, UnknownError } from "./errors/error.js";
 
 export async function post(url, data) {
   try {
@@ -10,20 +11,12 @@ export async function post(url, data) {
       body: JSON.stringify(data),
     });
 
-    if (response.status === 401) {
-      throw new UnauthorizedError();
+    const error = mapHttpError(response);
+    if (error) {
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new NetworkError();
-    }
-
     return await response.json();
   } catch (e) {
-    if (e instanceof UnauthorizedError) {
-      throw e;
-    }
-
-    throw new NetworkError();
+    throw mapUnknownError(e);
   }
 }

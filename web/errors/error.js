@@ -15,3 +15,8 @@ export class NetworkError extends AppError {
     super("네트워크 오류");
   }
 }
+export class UnknownError extends AppError {
+  constructor() {
+    super("알 수 없는 오류가 발생했습니다.");
+  }
+}
