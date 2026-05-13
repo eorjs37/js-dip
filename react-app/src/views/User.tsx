@@ -1,7 +1,7 @@
 import useUser from "../hooks/useUser";
 
 function User() {
-  const { updateData, disabled, statusText } = useUser();
+  const { updateData, disabled, statusText, data } = useUser();
   return (
     <div className="container">
       USER
@@ -19,6 +19,15 @@ function User() {
       >
         {statusText}
       </button>
+      {data && (
+        <ul>
+          {data.map((user) => (
+            <li key={user.id}>
+              {user.name}/{user.address.city}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

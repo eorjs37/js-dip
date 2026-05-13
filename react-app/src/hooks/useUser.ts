@@ -1,12 +1,13 @@
 import { useState } from "react";
 import type { LoadingStatus } from "./types/LoadingType";
+import type { User } from "./types/UserType";
 const STATUS_TEXT: Record<LoadingStatus, string> = {
   idle: "Submit",
   loading: "Loading...",
   success: "Completed",
 };
 function useUser() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState<LoadingStatus>("idle");
   const [error, setError] = useState("");
 
