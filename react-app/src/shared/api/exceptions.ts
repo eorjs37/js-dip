@@ -42,3 +42,11 @@ export class TimeoutException extends HttpException {
     this.name = "TimeoutException";
   }
 }
+
+export class RequestCancelledException extends HttpException {
+  constructor(url: string, method: string, body?: unknown) {
+    super(499, url, method, body, `[${method}] Request Cancelled: ${url}`);
+
+    this.name = "RequestCancelledException";
+  }
+}

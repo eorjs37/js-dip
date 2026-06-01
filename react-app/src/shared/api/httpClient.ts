@@ -3,6 +3,7 @@ import {
   HttpException,
   InternalServerException,
   NotFoundException,
+  RequestCancelledException,
   TimeoutException,
 } from "./exceptions";
 
@@ -12,6 +13,7 @@ type RequestOptions = Omit<RequestInit, "body"> & {
   query?: Record<string, string>;
   body?: unknown;
   timeout?: number;
+  signal?: AbortSignal;
 };
 function createHttpException(status: number, url: string, method: string, body?: unknown) {
   switch (status) {
@@ -34,10 +36,14 @@ async function request<T>(url: string, options?: RequestOptions): Promise<T> {
   const queryString = query ? `?${new URLSearchParams(query).toString()}` : "";
   const method = options?.method ?? "GET";
   const controller = new AbortController();
+  const externalSignal = options?.signal;
   const timeoutId = window.setTimeout(() => {
-    controller.abort();
+    controller.abort("timeout");
   }, options?.timeout ?? DEFAULT_TIMEOUT);
-
+  const abort = () => {
+    controller.abort("cancel");
+  };
+  externalSignal?.addEventListener("abort", abort);
   try {
     const response = await fetch(`${BASE_URL}${url}${queryString}`, {
       ...rest,
@@ -55,12 +61,16 @@ async function request<T>(url: string, options?: RequestOptions): Promise<T> {
     return response.json();
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
+      if (externalSignal?.aborted) {
+        throw new RequestCancelledException(url, method, body);
+      }
       throw new TimeoutException(url, method, body);
     }
 
     throw error;
   } finally {
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener("abort", abort);
   }
 }
 
