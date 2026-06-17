@@ -15,16 +15,16 @@ type RequestOptions = Omit<RequestInit, "body"> & {
   timeout?: number;
   signal?: AbortSignal;
 };
-function createHttpException(status: number, url: string, method: string, body?: unknown) {
+function createHttpException(status: number, url: string, method: string, body?: unknown, message?: string) {
   switch (status) {
     case 400:
-      return new BadRequestException(url, method, body);
+      return new BadRequestException(url, method, body, message);
 
     case 404:
-      return new NotFoundException(url, method, body);
+      return new NotFoundException(url, method, body, message);
 
     case 500:
-      return new InternalServerException(url, method, body);
+      return new InternalServerException(url, method, body, message);
 
     default:
       return new HttpException(status, url, method, body);
@@ -53,12 +53,12 @@ async function request<T>(url: string, options?: RequestOptions): Promise<T> {
       },
       body: body ? JSON.stringify(body) : undefined,
     });
-
+    const data = await response.json();
     if (!response.ok) {
-      throw createHttpException(response.status, url, method, body);
+      throw createHttpException(response.status, url, method, body, data.message);
     }
 
-    return response.json();
+    return data;
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       if (externalSignal?.aborted) {
