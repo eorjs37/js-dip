@@ -1,5 +1,5 @@
 import useForm from "../hooks/useForm";
-
+import useLogin from "../hooks/useLogin";
 type LoginForm = {
   email: string;
   password: string;
@@ -23,8 +23,18 @@ const validate = (values: LoginForm) => {
 };
 function Login() {
   const { values, errors, handleChange, handleSubmit } = useForm(initialValues, validate);
-  const onSubmit = (values: LoginForm) => {
-    console.log(values);
+  const { login } = useLogin();
+  const onSubmit = async (values: LoginForm) => {
+    try {
+      await login(values.email, values.password);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("알 수 없는 오류");
+      }
+    }
   };
 
   function handleLogin() {
